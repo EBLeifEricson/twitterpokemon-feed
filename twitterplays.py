@@ -11,6 +11,7 @@ version = "v2.1"
 
 pngFile = "current.png" # Location to save current frame
 tweetFile = "tweets.html" # Location to save most recent tweets
+jsonFile = "https://screenshake.club/share/tpp" # Location of the JSON file containing relevant game data
 
 # Twitter API Keys - fill in with your own OAuth info
 CONSUMERKEY=""
@@ -32,7 +33,7 @@ def getAPI():
 Download and parse the latest game data file from Constantin
 '''
 def getJSONData():
-    pressxtojson = urllib.request.urlopen("https://screenshake.club/share/tpp")
+    pressxtojson = urllib.request.urlopen(jsonFile)
     jsondata = json.loads(pressxtojson.read())
     pressxtojson.close()
     time = jsondata["LastInputTime"]
