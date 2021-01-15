@@ -4,8 +4,10 @@ from datetime import datetime
 import time
 import traceback
 from io import BytesIO
+import json
+import dateutil.parser
 
-version = "v2.0"
+version = "v2.1"
 
 pngFile = "current.png" # Location to save current frame
 tweetFile = "tweets.html" # Location to save most recent tweets
@@ -27,13 +29,30 @@ def getAPI():
     return api
 
 '''
+Download and parse the latest game data file from Constantin
+'''
+def getJSONData():
+    pressxtojson = urllib.request.urlopen("https://screenshake.club/share/tpp")
+    jsondata = json.loads(pressxtojson.read())
+    pressxtojson.close()
+    time = jsondata["LastInputTime"]
+    time = dateutil.parser.parse(time)
+    chosenInput = jsondata["LastInput"]
+    inputCount = jsondata["ChosenInputCount"]
+    return time, chosenInput, inputCount
+
+'''
 Load the most recent tweets and save them to an html file
 '''
 def updateTweets(api):
+    lastTime, chosenInput, inputCount = getJSONData()
+
     results = api.GetSearch(
         raw_query="q=%40screenshakes&src=typeahead_click&f=live&count=50")
     tweetstr = ""
     counter = 0
+    timesince = (datetime.now(timezone.utc)-lastTime).seconds
+    tweetstr += "<b>Time Since Press: </b>" + str(timesince) + "s (" + str(chosenInput) + ", " + str(inputCount) + " votes)<br><br>"
     for result in results:
         if counter > 9:
             break
@@ -91,11 +110,10 @@ def main():
             time.sleep(5)
             updateTweets(api)
         except twitter.error.TwitterError as err: # Completely ignore API errors for unattended running
-            continue
+            print(err)
         except Exception as exc: # Print other errors, but ignore them. Again, for unattended running
             print(traceback.format_exc())
             print(exc)
-        break
 
 if __name__ == "__main__":
     main()
