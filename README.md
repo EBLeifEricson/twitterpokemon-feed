@@ -1,7 +1,7 @@
 # twitterpokemon-feed
 Script that updates the TwitterPlaysPokemon feed site at https://leif.gg/tpp/new
 
-Note: The script ignores all errors, which is pretty bad practice. However, it can run unattended for long periods (which is perfect for this application.)
+Note: The script ignores all errors, which is pretty bad practice. However, it can run unattended for long periods (which is perfect for this not-so-serious application.)
 
 ## Usage
 1. Download source here: https://github.com/EBLeifEricson/twitterpokemon-feed/archive/main.zip
@@ -10,4 +10,4 @@ Note: The script ignores all errors, which is pretty bad practice. However, it c
 4. Edit the "url" variable in index.html to reflect the same image location
 3. Run "runntpp.sh" file if on Linux, "runtpp.bat" if on Windows (this is to prevent crashes when running unattended)
 
-Script requires Python 3.x with the python-twitter package
+Script requires Python 3.x with the python-twitter & python-dateutil packages
