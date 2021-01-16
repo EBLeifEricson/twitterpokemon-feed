@@ -1,16 +1,21 @@
 import twitter
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import traceback
 from io import BytesIO
+import urllib
 import json
 import dateutil.parser
+from threading import Thread
 
-version = "v2.1"
+version = "v2.3"
 
-pngFile = "current.png" # Location to save current frame
-tweetFile = "tweets.html" # Location to save most recent tweets
+pngFile = "/var/www/html/tpp/current.png"
+tweetFile = "/var/www/html/tpp/new/tweets.html"
+
+#pngFile = "current.png" # Location to save current frame
+#tweetFile = "tweets.html" # Location to save most recent tweets
 jsonFile = "https://screenshake.club/share/tpp" # Location of the JSON file containing relevant game data
 
 # Twitter API Keys - fill in with your own OAuth info
@@ -45,76 +50,123 @@ def getJSONData():
 '''
 Load the most recent tweets and save them to an html file
 '''
-def updateTweets(api):
-    lastTime, chosenInput, inputCount = getJSONData()
-
-    results = api.GetSearch(
-        raw_query="q=%40screenshakes&src=typeahead_click&f=live&count=50")
-    tweetstr = ""
-    counter = 0
-    timesince = (datetime.now(timezone.utc)-lastTime).seconds
-    tweetstr += "<b>Time Since Press: </b>" + str(timesince) + "s (" + str(chosenInput) + ", " + str(inputCount) + " votes)<br><br>"
-    for result in results:
-        if counter > 9:
-            break
-        status = api.GetStatus(result.id)
-        if not status.text.startswith("RT @"):
-            text = status.text.replace("@screenshakes", " ")
-            author = status.user.name
-            tweettime = status.created_at
-            tweettime = datetime.strptime(tweettime,'%a %b %d %H:%M:%S +0000 %Y').strftime("%m/%d/%Y, %H:%M:%S")
-        
-            tweetstr += text
-            tweetstr += "<span style=\"color:grey;\"><br>— <b>"
-            tweetstr += author + "</b><small> "
-            tweetstr += tweettime
-            tweetstr += " UTC</small></span><br><br>"
-
-            counter += 1
-    timestamp = datetime.now().strftime('%d-%b-%Y %H-%M-%S')
-    print(timestamp+" Updating tweets...")
-    tweetfile = open(tweetFile, "wb")
-    tweetfile.write(tweetstr.encode('utf-8'))
-    tweetfile.close()
-
-'''
-Load the most recent profile picture and save it to a png file
-'''
-def updateImage(api):
-    pic_url = api.GetUser(screen_name="screenshakes").profile_image_url
-    pic_url = pic_url.split("_normal")[0]
-    timestamp = datetime.now().strftime('%d-%b-%Y %H-%M-%S')
-    print(timestamp+" Updating image...")
-    with open(pngFile, "wb") as handle:
-        response = requests.get(pic_url+".png", stream=True)
-        if not response.ok:
-            print(response)
-
-        for block in response.iter_content(1024):
-            if not block:
-                break
-            handle.write(block)          
-    handle.close()
-
-def main():
-    print("twitterplays "+version+" by LeifEricson")
-    while True: # Endlessly loop
+def updateTweets():
+    while True:
         try:
-            # Due to API limitations, pfp is refreshed every 5s and the tweets every 15s
-            # A new API object is created in case of random api errors, since script runs unattended
             api = getAPI()
-            updateImage(api)
-            time.sleep(5)
-            updateImage(api)
-            time.sleep(5)
-            updateImage(api)
-            time.sleep(5)
-            updateTweets(api)
+            lastTime, chosenInput, inputCount = getJSONData()
+
+            results = api.GetSearch(
+                raw_query="q=%40screenshakes&src=typeahead_click&f=live&count=50")
+                
+            tweetstr = "<head><script> \n\
+        // Set the date we're counting down to \n\
+        var countDownDate = new Date(\""+lastTime.strftime("%m/%d/%Y %H:%M:%S UTC")+"\").getTime(); \n\
+        \n\
+        // Update the count down every 1 second \n\
+        var x = setInterval(function() { \n\
+        \n\
+          // Get today's date and time \n\
+          var now = new Date().getTime(); \n\
+        \n\
+          // Find the distance between now and the count down date \n\
+         var distance = now - countDownDate; \n\
+        \n\
+          var seconds = Math.floor(distance / 1000); \n\
+        \n\
+          // Display the result in the element with id=\"demo\" \n\
+          document.getElementById(\"demo\").innerHTML = seconds; \n\
+        \n\
+          // If the count down is finished, write some text \n\
+          if (distance < -15) { \n\
+            clearInterval(x); \n\
+            document.getElementById(\"demo\").innerHTML = \"EXPIRED\"; \n\
+          } \n\
+        }, 1000); \n\
+        </script></head><body>\n"
+
+            counter = 0
+            timesince = (datetime.now(timezone.utc)-lastTime).seconds
+            inputStr = "NONE"
+            if str(chosenInput) != "":
+                inputStr = str(chosenInput)
+            tweetstr += "<b>Time Since Press: </b>" + "<span id=\"demo\"> </span>" + "s (" + inputStr + ", " + str(inputCount) + " votes)<br><br>"
+            for result in results:
+                if counter > 9:
+                    break
+                status = api.GetStatus(result.id)
+                if not status.text.startswith("RT @"):
+                    text = status.text.replace("@screenshakes", " ")
+                    author = status.user.name
+                    tweettime = status.created_at
+                    tweettime = datetime.strptime(tweettime,'%a %b %d %H:%M:%S +0000 %Y').strftime("%m/%d/%Y, %H:%M:%S")
+                
+                    tweetstr += text
+                    tweetstr += "<span style=\"color:grey;\"><br>— <b>"
+                    tweetstr += author + "</b><small> "
+                    tweetstr += tweettime
+                    tweetstr += " UTC</small></span><br><br>"
+
+                    counter += 1
+            timestamp = datetime.now().strftime('%d-%b-%Y %H-%M-%S')
+            print(timestamp+" Updating tweets...")
+            tweetfile = open(tweetFile, "wb")
+            tweetfile.write(tweetstr.encode('utf-8'))
+            tweetfile.close()
+            
+            lastTime, chosenInput, inputCount = getJSONData()
+            timesince = (datetime.now(timezone.utc)-lastTime).seconds
+            if timesince < 4:
+                print("Tweets in sync...")
+                time.sleep(15)
+            else:
+                print("Tweets not in sync, realigning...")
+                time.sleep(14)
         except twitter.error.TwitterError as err: # Completely ignore API errors for unattended running
             print(err)
         except Exception as exc: # Print other errors, but ignore them. Again, for unattended running
             print(traceback.format_exc())
             print(exc)
+
+'''
+Load the most recent profile picture and save it to a png file
+'''
+def updateImage():
+    while True: # Endlessly loop
+        try:
+            api = getAPI()
+            pic_url = api.GetUser(screen_name="screenshakes").profile_image_url
+            pic_url = pic_url.split("_normal")[0]
+            timestamp = datetime.now().strftime('%d-%b-%Y %H-%M-%S')
+            print(timestamp+" Updating image...")
+            with open(pngFile, "wb") as handle:
+                response = requests.get(pic_url+".png", stream=True)
+                if not response.ok:
+                    print(response)
+
+                for block in response.iter_content(1024):
+                    if not block:
+                        break
+                    handle.write(block)          
+            handle.close()
+            time.sleep(5)
+        except twitter.error.TwitterError as err: # Completely ignore API errors for unattended running
+            print(err)
+        except Exception as exc: # Print other errors, but ignore them. Again, for unattended running
+            print(traceback.format_exc())
+            print(exc)
+
+def main():
+    print("twitterplays "+version+" by LeifEricson")
+
+    # Due to API limitations, pfp is refreshed every 5s and the tweets every 15s
+    # A new API object is created in case of random api errors, since script runs unattended
+    t1 = Thread(target = updateTweets, args = ())
+    t2 = Thread(target = updateImage, args = ())
+    t1.start()
+    t2.start()
+
+
 
 if __name__ == "__main__":
     main()

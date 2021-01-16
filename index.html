@@ -1,6 +1,19 @@
 <html>
 <head>
+
+<meta http-equiv="refresh" content="0; URL=http://leif.gg/tpp/new" />
+
 <title>TPP Live Feed</title>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-173385620-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-173385620-1');
+</script>
+
 
 <script type="text/JavaScript">
 var url = "http://leif.gg/tpp/current.png"; //url to load image from
@@ -15,7 +28,6 @@ function init() {
     img.onload = function() {
         canvas.setAttribute("width", img.width)
         canvas.setAttribute("height", img.height)
-		canvas.style.display = "block";
         context.drawImage(this, 0, 0);
         if(drawDate) {
             var now = new Date();
@@ -29,27 +41,14 @@ function init() {
             context.fillStyle = 'white';
             context.fillText(text, x, y, maxWidth);
         }
-		
     };
     refresh();
 }
 function refresh()
 {
-
     img.src = url + "?t=" + new Date().getTime();
-	document.getElementById('iframe').src += "";
-    setTimeout(refresh,refreshInterval);
+    setTimeout("refresh()",refreshInterval);
 }
-
-//window.onresize = function()
-//{
-//    var canvas = document.getElementById('canvas');
-	
-//    canvas.width = window.innerHeight*1.111;
-//    canvas.style.width = window.innerHeight*1.111;
-//    canvas.height = window.innerHeight;
-//    canvas.style.height = window.innerHeight;
-//}
 
 </script>
 
@@ -66,10 +65,10 @@ function refresh()
     </style>
 
 </head>
-<body onload="JavaScript:init();" style="overflow:scroll;display: flex;flex-direction: column;">
-<h3>Twitter Plays Pokemon Feed 2.1 (<a href="https://linktr.ee/leifericson">What's this?</a>)</h3>
-<span><canvas id="canvas" style="height: 70vmin;position: static;padding-bottom: 5px;margin-bottom: 0px;"/></span>
-<iframe id="iframe" frameborder="0" src="tweets.html" style="position: static;height: 90vmin;width: 70vmin;overflow:scroll"></iframe>
+<body onload="JavaScript:init();">
+<h3>Twitter Plays Pokemon Live Feed (<a href="https://twitter.com/screenshakes">What's this?</a>)</h3>
+<canvas id="canvas" height="90%" width="90%"/>
+<canvas> </canvas>
 
 </body>
 </html>
