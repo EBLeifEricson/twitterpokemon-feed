@@ -9,14 +9,13 @@ import json
 import dateutil.parser
 from threading import Thread
 
-version = "v2.3"
+version = "v2.3.1"
 
-pngFile = "/var/www/html/tpp/current.png"
-tweetFile = "/var/www/html/tpp/new/tweets.html"
+# CHANGE THESE TO REFLECT YOUR SERVER CONFIGURATION - MUST BE ACCESSIBLE BY INDEX.HTML
+pngFile = "current.png" # Location to save current frame (probably want this on your webserver)
+tweetFile = "tweets.html" # Location to save most recent tweets (also want this on your webserver)
 
-#pngFile = "current.png" # Location to save current frame
-#tweetFile = "tweets.html" # Location to save most recent tweets
-jsonFile = "https://screenshake.club/share/tpp" # Location of the JSON file containing relevant game data
+jsonFile = "https://screenshake.club/share/tpp" # Location of the JSON file containing relevant game data (if present)
 
 # Twitter API Keys - fill in with your own OAuth info
 CONSUMERKEY=""
