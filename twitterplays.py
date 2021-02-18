@@ -17,6 +17,8 @@ tweetFile = "tweets.html" # Location to save most recent tweets (also want this 
 
 jsonFile = "https://screenshake.club/share/tpp" # Location of the JSON file containing relevant game data (if present)
 
+profile_name = "screenshakes" # Twitter profile to pull image from
+
 # Twitter API Keys - fill in with your own OAuth info
 CONSUMERKEY=""
 CONSUMERSECRET=""
@@ -56,7 +58,7 @@ def updateTweets():
             lastTime, chosenInput, inputCount = getJSONData()
 
             results = api.GetSearch(
-                raw_query="q=%40screenshakes&src=typeahead_click&f=live&count=50")
+                raw_query="q=%40"+profile_name+"&src=typeahead_click&f=live&count=50")
                 
             tweetstr = "<head><script> \n\
         // Set the date we're counting down to \n\
@@ -134,7 +136,7 @@ def updateImage():
     while True: # Endlessly loop
         try:
             api = getAPI()
-            pic_url = api.GetUser(screen_name="screenshakes").profile_image_url
+            pic_url = api.GetUser(screen_name=profile_name).profile_image_url
             pic_url = pic_url.split("_normal")[0]
             timestamp = datetime.now().strftime('%d-%b-%Y %H-%M-%S')
             print(timestamp+" Updating image...")
