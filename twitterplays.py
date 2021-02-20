@@ -9,7 +9,7 @@ import json
 import dateutil.parser
 from threading import Thread
 
-version = "v2.3.1"
+version = "v2.3.2"
 
 # CHANGE THESE TO REFLECT YOUR SERVER CONFIGURATION - MUST BE ACCESSIBLE BY INDEX.HTML
 pngFile = "current.png" # Location to save current frame (probably want this on your webserver)
@@ -97,7 +97,7 @@ def updateTweets():
                     break
                 status = api.GetStatus(result.id)
                 if not status.text.startswith("RT @"):
-                    text = status.text.replace("@screenshakes", " ")
+                    text = status.text.replace("@"+profile_name, " ") # Hide the leading @ tag
                     author = status.user.name
                     tweettime = status.created_at
                     tweettime = datetime.strptime(tweettime,'%a %b %d %H:%M:%S +0000 %Y').strftime("%m/%d/%Y, %H:%M:%S")
@@ -166,8 +166,6 @@ def main():
     t2 = Thread(target = updateImage, args = ())
     t1.start()
     t2.start()
-
-
 
 if __name__ == "__main__":
     main()
