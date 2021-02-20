@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import twitter
 import requests
 from datetime import datetime, timezone
