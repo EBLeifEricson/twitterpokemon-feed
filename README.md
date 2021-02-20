@@ -1,5 +1,5 @@
 # twitterpokemon-feed
-Script that updates the TwitterPlaysPokemon feed site at https://leif.gg/tpp/new
+Script that updated the TwitterPlaysPokemon feed site at https://leif.gg/tpp/new, can also be used as a general tool for similar projects, to pull Twitter profile images to your local webserver.
 
 Note: The script ignores all errors, which is pretty bad practice. However, it can run unattended for long periods (which is perfect for this not-so-serious application.)
 
